@@ -5,7 +5,7 @@ class Author(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
 
 class Article(models.Model):
-	headline = models.CharField(max_length=100)
+	headline = models.CharField(max_length=64)
  
 	POLITICS = 'pol'
 	ART = 'art'
