@@ -163,6 +163,22 @@ def get_stories(request):
 	return http_response
 
 def delete_story(request, key : int):
-	return render(request, 'delete_story.html')
+	if not request.user.is_authenticated:
+		http_response = HttpResponse("Not logged in", content_type='text/plain')
+		http_response.status_code = 503
+		http_response.reason_phrase = 'Service Unavailable'
+		return http_response
+
+	try:
+		story = Article.objects.get(id=key)
+	except Article.DoesNotExist:
+		http_response = HttpResponse("Story not found", content_type='text/plain')
+		http_response.status_code = 503
+		http_response.reason_phrase = 'Service Unavailable'
+		return http_response
+
+	story.delete()
+
+	return HttpResponse(status=200, reason='OK')
 
 
