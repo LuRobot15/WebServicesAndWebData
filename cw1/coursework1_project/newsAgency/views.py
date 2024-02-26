@@ -1,12 +1,33 @@
 from django.shortcuts import render
 from models import Author, Article
+import json
+from django.http import HttpResponse
+from django.contrib.auth import authenticate, login
 
 # Create your views here.
 def login(request):
-	return render(request, 'login.html')
+	username = request.POST.get("username")
+	password = request.POST.get("password")
+	user = authenticate(request, username=username, password=password)
+	if user is not None:
+		# A backend authenticated the credentials
+		login(request, user)
+
+		http_response = HttpResponse("Login successful", content_type='text/plain', status=200, reason='OK')
+		return http_response
+	else:
+		# No backend authenticated the credentials
+		http_response = HttpResponse("Login failed", content_type='text/plain', status=401, reason='Unauthorized')
+		return http_response
 
 def logout(request):
-	return render(request, 'logout.html')
+	if not request.user.is_authenticated:
+		http_response = HttpResponse("Not logged in", content_type='text/plain', status=400, reason='Bad request')
+		return http_response
+	else:
+		logout(request)
+		http_response = HttpResponse("Logout successful", content_type='text/plain', status=200, reason='OK')
+		return http_response
 
 def stories(request):
 	if request.method == 'GET':
@@ -20,7 +41,47 @@ def post_story(request):
 	return render(request, 'post_story.html')
 
 def get_stories(request):
-	return render(request, 'get_stories.html')
+	story_catagory = request.GET.get("story_cat")
+	story_region = request.GET.get("story_region")
+	story_date = request.GET.get("story_date")
+ 
+	stories = Article.objects.all()
+
+	if story_catagory != "*":
+		stories = stories.filter(story_catagory=story_catagory)
+	if story_region != "*":
+		stories = stories.filter(region=story_region)
+	if story_date != "":
+		stories = stories.filter(created_at__gte=story_date)
+  
+	story_collection = []
+	for story in stories:
+		author = story.author
+		author_name = author.user.first_name + " " + author.user.last_name
+		item = {
+			"key" : story.id,
+			"headline" : story.headline,
+			"story_cat" : story.story_catagory,
+			"story_region" : story.region,
+   			"author" : author_name,
+			"story_date" : story.created_at,
+			"story_details" : story.story_details
+		}
+		story_collection.append(item)
+	if (len(story_collection) == 0):
+		http_response = HttpResponse("No stories found matching the given criteria", content_type='text/plain')
+		http_response.status_code = 404
+		http_response.reason_phrase = 'Not Found'
+		return http_response
+
+
+	payload = {"stories" : story_collection}
+ 
+	#creating the response
+	http_response = HttpResponse(json.dumps(payload), content_type='application/json')
+	http_response.status_code = 200
+	http_response.reason_phrase = 'OK'
+	return http_response
 
 def delete_story(request, key : int):
 	return render(request, 'delete_story.html')
