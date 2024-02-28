@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .models import Author, Article
 import json
+import datetime
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.http import require_http_methods
@@ -10,22 +11,19 @@ from django.views.decorators.csrf import csrf_exempt
 @require_http_methods(["POST"])
 @csrf_exempt
 def auth_login(request):
-	try:
-		username = request.POST.get("username")
-		password = request.POST.get("password")
-		user = authenticate(request, username=username, password=password)
-		if user is not None:
-			# A backend authenticated the credentials
-			login(request, user)
+	username = request.POST.get("username")
+	password = request.POST.get("password")
+	user = authenticate(request, username=username, password=password)
+	if user is not None:
+		# A backend authenticated the credentials
+		login(request, user)
 
-			http_response = HttpResponse("Login successful", content_type='text/plain', status=200, reason='OK')
-			return http_response
-		else:
-			# No backend authenticated the credentials
-			http_response = HttpResponse("Login failed", content_type='text/plain', status=401, reason='Unauthorized')
-			return http_response
-	except Exception as e:
-		print(e)
+		http_response = HttpResponse("Login successful", content_type='text/plain', status=200, reason='OK')
+		return http_response
+	else:
+		# No backend authenticated the credentials
+		http_response = HttpResponse("Login failed", content_type='text/plain', status=401, reason='Unauthorized')
+		return http_response
 
 @require_http_methods(["POST"])
 @csrf_exempt
@@ -64,9 +62,9 @@ def post_story(request):
 	
 	#creating the article object
 	story_headline = request.POST.get("headline")
-	story_catagory = request.POST.get("story_catagory")
-	story_region = request.POST.get("story_region")
-	story_details = request.POST.get("story_details")
+	story_catagory = request.POST.get("category")
+	story_region = request.POST.get("region")
+	story_details = request.POST.get("details")
 
 	#validating params given
 	if story_headline == None:
@@ -130,9 +128,12 @@ def post_story(request):
 	return HttpResponse(status=201, reason='Created')
 
 def get_stories(request):
-	story_catagory = request.GET.get("story_cat")
-	story_region = request.GET.get("story_region")
-	story_date = request.GET.get("story_date")
+	try:
+		story_catagory = request.GET.get("story_cat")
+		story_region = request.GET.get("story_region")
+		story_date = request.GET.get("story_date")
+	except Exception as e:
+		return HttpResponse("Invalid request", content_type='text/plain', status=400, reason='Bad request')
  
 	stories = Article.objects.all()
 
@@ -140,8 +141,9 @@ def get_stories(request):
 		stories = stories.filter(story_catagory=story_catagory)
 	if story_region != "*" and story_region != None:
 		stories = stories.filter(region=story_region)
-	if story_date != "" and story_date != None:
-		stories = stories.filter(created_at__gte=story_date)
+	if story_date != "*" and story_date != None:
+		date = datetime.strptime(story_date, "%d/%m/%Y")
+		stories = stories.filter(created_at__gte=date)
   
 	story_collection = []
 	for story in stories:
@@ -153,7 +155,7 @@ def get_stories(request):
 			"story_cat" : story.story_catagory,
 			"story_region" : story.region,
    			"author" : author_name,
-			"story_date" : story.created_at,
+			"story_date" : story.created_at.strftime("%d/%m/%Y"),
 			"story_details" : story.story_details
 		}
 		story_collection.append(item)

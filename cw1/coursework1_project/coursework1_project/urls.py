@@ -22,5 +22,5 @@ urlpatterns = [
     path('api/login', auth_login),
     path('api/logout', auth_logout),
     path('api/stories', stories),
-    path('api/stories/<int: key>', delete_story)
+    path('api/stories/<int:key>', delete_story)
 ]
