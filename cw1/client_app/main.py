@@ -1,6 +1,7 @@
 import requests
 import tabulate
-import json
+
+directory_service = "http://newssites.pythonanywhere.com/api/directory/"
 
 def main():
 	service = input("Enter service: ")
@@ -126,7 +127,7 @@ def delete_story(session : requests.Session, url : str):
 		print("reason: " + response.reason)
   
 def list_services():
-	response = requests.get("http://newssites.pythonanywhere.com/api/directory/")
+	response = requests.get(directory_service)
     
 	if response.status_code != 200:
 		print("Failed to get service list")
