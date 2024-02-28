@@ -1,7 +1,11 @@
 import requests
+import tabulate
+import json
 
 def main():
 	service = input("Enter service: ")
+	if service == "":
+		list_services()
 	session = requests.Session()
 	login(session, service)
     
@@ -12,6 +16,7 @@ def main():
 		print("3. Delete story")
 		print("4. Logout")
 		print("5. Exit")
+		print("list: List services")
 		choice = input("Enter choice: ")
 		
 		if choice == "1":
@@ -23,6 +28,8 @@ def main():
 		elif choice == "4" or choice == "5":
 			logout(session, service)
 			logged_in = False
+		elif choice == "list":
+			list_services()
 		else:
 			print("Invalid choice")
 
@@ -119,9 +126,22 @@ def delete_story(session : requests.Session, url : str):
 		print("reason: " + response.reason)
   
 def list_services():
-    response = requests.get("http://directory.pythonanywhere.com/api/directory/")
+	response = requests.get("http://newssites.pythonanywhere.com/api/directory/")
     
-    service_list = 
+	if response.status_code != 200:
+		print("Failed to get service list")
+		print("status code: " + str(response.status_code))
+		print("reason: " + response.reason)
+		return
+
+	print(response)
+	service_list =response.json()
+    
+	headers = service_list[0].keys()
+	rows = [x.values() for x in service_list]
+    
+	print(tabulate.tabulate(rows, headers, tablefmt="grid"))
+    
   
 
 if __name__ == "__main__":
