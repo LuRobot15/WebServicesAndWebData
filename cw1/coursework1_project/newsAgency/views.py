@@ -2,25 +2,34 @@ from django.shortcuts import render
 from .models import Author, Article
 import json
 from django.http import HttpResponse
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
-def login(request):
-	username = request.POST.get("username")
-	password = request.POST.get("password")
-	user = authenticate(request, username=username, password=password)
-	if user is not None:
-		# A backend authenticated the credentials
-		login(request, user)
+@require_http_methods(["POST"])
+@csrf_exempt
+def auth_login(request):
+	try:
+		username = request.POST.get("username")
+		password = request.POST.get("password")
+		user = authenticate(request, username=username, password=password)
+		if user is not None:
+			# A backend authenticated the credentials
+			login(request, user)
 
-		http_response = HttpResponse("Login successful", content_type='text/plain', status=200, reason='OK')
-		return http_response
-	else:
-		# No backend authenticated the credentials
-		http_response = HttpResponse("Login failed", content_type='text/plain', status=401, reason='Unauthorized')
-		return http_response
+			http_response = HttpResponse("Login successful", content_type='text/plain', status=200, reason='OK')
+			return http_response
+		else:
+			# No backend authenticated the credentials
+			http_response = HttpResponse("Login failed", content_type='text/plain', status=401, reason='Unauthorized')
+			return http_response
+	except Exception as e:
+		print(e)
 
-def logout(request):
+@require_http_methods(["POST"])
+@csrf_exempt
+def auth_logout(request):
 	if not request.user.is_authenticated:
 		http_response = HttpResponse("Not logged in", content_type='text/plain', status=400, reason='Bad request')
 		return http_response
@@ -29,6 +38,8 @@ def logout(request):
 		http_response = HttpResponse("Logout successful", content_type='text/plain', status=200, reason='OK')
 		return http_response
 
+@require_http_methods(["GET", "POST"])
+@csrf_exempt
 def stories(request):
 	if request.method == 'GET':
 		return get_stories(request)
@@ -162,6 +173,8 @@ def get_stories(request):
 	http_response.reason_phrase = 'OK'
 	return http_response
 
+@require_http_methods(["DELETE"])
+@csrf_exempt
 def delete_story(request, key : int):
 	if not request.user.is_authenticated:
 		http_response = HttpResponse("Not logged in", content_type='text/plain')

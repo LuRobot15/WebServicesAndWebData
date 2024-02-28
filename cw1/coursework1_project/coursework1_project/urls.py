@@ -15,12 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from newsAgency.views import login, logout, stories, delete_story
+from newsAgency.views import auth_login, auth_logout, stories, delete_story
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/login', login),
-    path('api/logout', logout),
+    path('api/login', auth_login),
+    path('api/logout', auth_logout),
     path('api/stories', stories),
     path('api/stories/<int: key>', delete_story)
 ]
