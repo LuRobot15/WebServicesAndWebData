@@ -1,7 +1,7 @@
 import requests
 import tabulate
 import random
-import datetime
+from datetime import datetime
 
 directory_service = "http://newssites.pythonanywhere.com/api/directory/"
 
@@ -61,6 +61,10 @@ def login(url : str, session : requests.Session):
 
 
 def logout(url : str, session : requests.Session):
+	if url == None:
+		print("Please login to a service first")
+		return
+
 	logout_url = url + "/api/logout"
     
 	response = session.post(logout_url)
@@ -76,6 +80,10 @@ def logout(url : str, session : requests.Session):
 
 
 def post_story(url : str, session : requests.Session):
+	if url == None:
+		print("Please login to a service first")
+		return
+    
 	post_story_url = url + "/api/stories"
 
 	headline = input("Headline: ")
@@ -92,9 +100,14 @@ def post_story(url : str, session : requests.Session):
 		print("Story post failed")
 		print("status code: " + str(response.status_code))
 		print("reason: " + response.reason)
+		print("response: " + response.text)
 
 
 def delete_story(url : str, key : int, session : requests.Session):
+	if url == None:
+		print("Please login to a service first")
+		return
+	
 	delete_story_url = url + "/api/stories/" + str(key)
  
 	response = session.delete(delete_story_url)
@@ -126,7 +139,7 @@ def get_stories(input_command : list):
 		elif option.startswith("-reg="):
 			params["story_region"] = option[5:]
 		elif option.startswith("-date="):
-			date = datetime.strptime(option[6:], "%d/%m%Y")
+			date = datetime.strptime(option[6:], "%d/%m/%Y")
 			params["story_date"] = date.strftime("%d/%m/%Y")
  
 	services = get_services()
@@ -138,13 +151,18 @@ def get_stories(input_command : list):
 
 	stories = []
 	for service in services_to_query:
-		response = requests.get(service["url"] + "/api/stories", params=api_params)
-		if response.status_code == 200:
-			stories += response.json().get("stories")
-		else:
+		try:
+			response = requests.get(service["url"] + "/api/stories", params=api_params)
+			if response.status_code == 200:
+				stories += response.json().get("stories")
+			else:
+				print("Get stories failed on ", service["url"] + "/api/stories")
+				print("status code: " + str(response.status_code))
+				print("reason: " + response.reason)
+		except Exception as e:
 			print("Get stories failed on ", service["url"] + "/api/stories")
-			print("status code: " + str(response.status_code))
-			print("reason: " + response.reason)
+			print("reason: " + str(e))
+			continue
 
 	print_stories(stories)
  
@@ -159,7 +177,7 @@ def get_desired_services(services : list, service_id : str) -> list:
 				break
 	else:
 		random.shuffle(services)
-		for i in range(5):
+		for i in range(20):
 			services_to_query.append(services[i])
 
 	if len(services_to_query) == 0:
@@ -169,6 +187,10 @@ def get_desired_services(services : list, service_id : str) -> list:
 
 
 def print_stories(stories : list):
+	if len(stories) == 0:
+		print("No stories found matching the given criteria")
+		return
+
 	headers = stories[0].keys()
 	rows = [x.values() for x in stories]
 	
