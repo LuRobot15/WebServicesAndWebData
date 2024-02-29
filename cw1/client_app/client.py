@@ -23,7 +23,7 @@ def main():
 		elif input_command[0] == "news":
 			get_stories(input_command)
 		elif input_command[0] == "delete":
-			delete_story(input_command[1])
+			delete_story(service_logged_into, input_command[1], session)
 		elif input_command[0] == "list":
 			list_services()
 		else:
@@ -140,12 +140,11 @@ def get_stories(input_command : list):
 	for service in services_to_query:
 		response = requests.get(service["url"] + "/api/stories", params=api_params)
 		if response.status_code == 200:
-			stories += response.json()
+			stories += response.json().get("stories")
 		else:
 			print("Get stories failed on ", service["url"] + "/api/stories")
 			print("status code: " + str(response.status_code))
 			print("reason: " + response.reason)
-			print("response: " + response.text)
 
 	print_stories(stories)
  
@@ -160,7 +159,7 @@ def get_desired_services(services : list, service_id : str) -> list:
 				break
 	else:
 		random.shuffle(services)
-		for i in range(20):
+		for i in range(5):
 			services_to_query.append(services[i])
 
 	if len(services_to_query) == 0:
@@ -198,3 +197,6 @@ def print_services(service_list : list):
 	rows = [x.values() for x in service_list]
     
 	print(tabulate.tabulate(rows, headers, tablefmt="grid"))
+ 
+if __name__ == "__main__":
+	main()

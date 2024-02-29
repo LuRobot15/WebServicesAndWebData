@@ -105,7 +105,7 @@ def get_stories(session : requests.Session, url : str):
 	response = session.get(get_stories_url, params=payload)
  
 	if response.status_code == 200:
-		print(response.json())
+		print(response.json().get("stories"))
 	else:
 		print("Get stories failed")
 		print("status code: " + str(response.status_code))
