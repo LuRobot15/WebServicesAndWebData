@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Author, Article
 import json
-import datetime
+from datetime import datetime
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.http import require_http_methods
