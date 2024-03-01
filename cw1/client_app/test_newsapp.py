@@ -79,7 +79,7 @@ def post_story(session : requests.Session, url : str):
  
 	response = session.post(post_story_url, data=payload)
  
-	if response.status_code == 200:
+	if response.status_code == 201:
 		print("Story posted successfully")
 	else:
 		print("Story post failed")
