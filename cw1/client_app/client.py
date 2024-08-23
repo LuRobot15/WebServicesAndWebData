@@ -53,6 +53,8 @@ def login(url : str, session : requests.Session):
 			print("Login failed")
 			print("status code: " + str(response.status_code))
 			print("reason: " + response.reason)
+			if response.content_type == "text/plain":
+				print("response: " + response.text)
 
 	if success:
 		return url
@@ -76,6 +78,8 @@ def logout(url : str, session : requests.Session):
 		print("Logout failed")
 		print("status code: " + str(response.status_code))
 		print("reason: " + response.reason)
+		if response.content_type == "text/plain":
+			print("response: " + response.text)
 		return False
 
 
@@ -100,7 +104,8 @@ def post_story(url : str, session : requests.Session):
 		print("Story post failed")
 		print("status code: " + str(response.status_code))
 		print("reason: " + response.reason)
-		print("response: " + response.text)
+		if response.content_type == "text/plain":
+			print("response: " + response.text)
 
 
 def delete_story(url : str, key : int, session : requests.Session):
@@ -118,6 +123,8 @@ def delete_story(url : str, key : int, session : requests.Session):
 		print("Story delete failed")
 		print("status code: " + str(response.status_code))
 		print("reason: " + response.reason)
+		if response.content_type == "text/plain":
+			print("response: " + response.text)
 
 
 def get_stories(input_command : list):
@@ -159,6 +166,8 @@ def get_stories(input_command : list):
 				print("Get stories failed on ", service["url"] + "/api/stories")
 				print("status code: " + str(response.status_code))
 				print("reason: " + response.reason)
+				if response.content_type == "text/plain":
+					print("response: " + response.text)
 		except Exception as e:
 			print("Get stories failed on ", service["url"] + "/api/stories")
 			print("reason: " + str(e))
@@ -209,6 +218,8 @@ def get_services():
 		print("Failed to get service list")
 		print("status code: " + str(response.status_code))
 		print("reason: " + response.reason)
+		if response.content_type == "text/plain":
+			print("response: " + response.text)
 		return
 
 	return response.json()
