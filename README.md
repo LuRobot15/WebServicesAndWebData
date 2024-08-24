@@ -8,3 +8,5 @@ The client_app folder contains all other code required for the coursework.
 client.py contains the client app.
 register_client.py contains the script used to register the client with the directory service.
 test_newsapp.py is a program used to test the API before it was registered.
+
+I recived 30/30 for this coursework.
